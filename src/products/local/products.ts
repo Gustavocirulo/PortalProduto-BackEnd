@@ -1,6 +1,6 @@
 import fs, { writeFile } from 'fs/promises';
 import axios from "axios";
-import Product from '../interfaces/products';
+import Product from '../../interfaces/products';
 import { pipeline } from 'stream';
 import { AddressInfo } from 'net';
 
@@ -40,7 +40,8 @@ class ProductProcessor {
             description: product.description,
             price: product.price,
             category: product.category,
-            pictureUrl: product.pictureUrl
+            pictureUrl: product.pictureUrl,
+            stock: product.stock
           }
           
           allowedProducts.push(permissibleProduct);

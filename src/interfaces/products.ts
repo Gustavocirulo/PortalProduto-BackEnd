@@ -1,3 +1,4 @@
+
 interface Product {
   id: number;
   name: string;
@@ -5,6 +6,7 @@ interface Product {
   price: number;
   category: string;
   pictureUrl: string;
+  stock: number;
 }
 
 export default Product;

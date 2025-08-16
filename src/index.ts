@@ -10,6 +10,8 @@ import { AddressInfo } from 'net';
 import productsRepository from './repository/products';
 import UserRepository from './repository/user';
 import Authentication from './auth/authentication';
+import cors from '@fastify/cors';
+import { globSync } from 'glob';
 
 // Declare os tipos dos decorators
 declare module 'fastify' {
@@ -31,10 +33,37 @@ server.register(multipart, {
   },
 });
 
-server.register(fastifyStatic, {
-  root: path.join(__dirname, '..', 'tmp/images'),
-  prefix: '/products/image',
-  decorateReply: false
+
+
+// Endpoint customizado para servir imagens sem precisar da extensão
+import axios from 'axios';
+server.get('/products/image/:filename', async (request: FastifyRequest, reply: FastifyReply) => {
+  const { filename } = request.params as { filename: string };
+  const imageDir = path.join(__dirname, '..', 'tmp/images');
+  // Procura por qualquer extensão de imagem
+  const files = globSync(`${imageDir}/${filename}.*`);
+  if (files.length > 0) {
+    const filePath = files[0];
+    return reply.send(fs.createReadStream(filePath));
+  }
+  // Se não encontrar localmente, busca o produto no banco
+  const product = await productsRepository.findById(Number(filename));
+  if (product && product.pictureUrl) {
+    try {
+      const response = await axios.get(product.pictureUrl, { responseType: 'stream' });
+      reply.header('Content-Type', response.headers['content-type'] || 'image/jpeg');
+      return reply.send(response.data);
+    } catch (err) {
+      // continua para imagem padrão
+    }
+  }
+  // Se não encontrar nada, retorna imagem padrão
+  const defaultImagePath = path.join(imageDir, 'NO_IMAGE_FOUND.png');
+  if (fs.existsSync(defaultImagePath)) {
+    return reply.send(fs.createReadStream(defaultImagePath));
+  } else {
+    return reply.status(404).send({ message: 'Imagem não encontrada' });
+  }
 });
 
 server.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -67,6 +96,12 @@ server.addHook('onError', async (request: FastifyRequest, reply: FastifyReply, e
 
 
 export async function routes(fastify: FastifyInstance, options: any) {
+  
+  fastify.register(cors, {
+    origin: '*', // Permite todas as origens
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
+    allowedHeaders: ['Content-Type', 'Authorization'], // Cabeçalhos permitidos
+  });
 
   fastify.decorate('authMiddleware', 
     async (request: FastifyRequest, reply: FastifyReply) => {

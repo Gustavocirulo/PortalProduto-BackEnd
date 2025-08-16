@@ -5,15 +5,12 @@ class ProductsRepository {
 
     async findAll(): Promise<Product[]> {
        return await db.transaction(async (trx) => {
-
         try {
             const products = await trx('products');
             return products;
         } catch (error) {
             await trx.rollback();
             throw new Error('Error fetching products');
-        } finally {
-            await trx.destroy();
         }
        });
     }
@@ -26,8 +23,6 @@ class ProductsRepository {
             } catch (error) {
                 await trx.rollback();
                 throw new Error('Error fetching product');
-            } finally {
-                await trx.destroy();
             }
         });
     }
@@ -40,8 +35,6 @@ class ProductsRepository {
             } catch (error) {
                 await trx.rollback();
                 throw new Error('Error creating product');  
-            } finally {
-                await trx.destroy();
             }
         });
     }
@@ -49,13 +42,13 @@ class ProductsRepository {
     async update(id: number, product: Product): Promise<Product> {
         return await db.transaction(async (trx) => {
             try {
-                const updatedProduct = await trx('products').where('id', id).update(product).returning('*');
+                // Remove o campo id do objeto product antes de atualizar
+                const { id: _, ...productData } = product;
+                const updatedProduct = await trx('products').where('id', id).update(productData).returning('*');
                 return updatedProduct[0];
             } catch (error) {
                 await trx.rollback();
                 throw new Error('Error updating product');
-            } finally {
-                await trx.destroy();
             }
         });
     }
@@ -64,12 +57,9 @@ class ProductsRepository {
         return await db.transaction(async (trx) => {
             try {
                 await trx('products').where('id', id).delete();
-                await trx.commit();
             } catch (error) {
                 await trx.rollback();
                 throw new Error('Error deleting product');
-            } finally {
-                await trx.destroy();
             }
         })
     }
