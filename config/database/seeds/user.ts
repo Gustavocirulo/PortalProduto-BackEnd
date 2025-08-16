@@ -6,14 +6,14 @@ export async function seed() {
     try {
       await trx('users').insert({
         name: 'Lucas',
-        email: 'lucas@gmail.com',
+        email: 'gustavocirulo@hotmail.com',
         password: await hashPassword('123456')
       });
 
       await trx('users').insert({
-        name: 'John',
-        email: 'john@gmail.com',
-        password: await hashPassword('123456')
+        name: 'Administrador',
+        email: 'admin',
+        password: await hashPassword('admin')
       });
 
       await trx('roles').insert({
