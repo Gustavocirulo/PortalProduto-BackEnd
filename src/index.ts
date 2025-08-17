@@ -405,7 +405,12 @@ export async function routes(fastify: FastifyInstance, options: any) {
 
 const start = async () => {
   try {
-    await server.listen({ port: 8081 });
+    // Azure App Service usa a variável PORT
+    const port = Number(process.env.PORT) || 8081;
+    const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+    
+    await server.listen({ port, host });
+    console.log(`🚀 Server running on ${host}:${port}`);
   } catch (err) {
     server.log.error(err);
     process.exit(1);

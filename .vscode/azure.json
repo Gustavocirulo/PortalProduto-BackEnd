@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "defaultProvider": "azureAppService",
+  "configs": [
+    {
+      "name": "PortalProduto-Backend",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/out/src/index.js",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}

@@ -6,10 +6,18 @@
   "scripts": {
     "run-dev": "cd src && npx ts-node index.ts",
     "build": "npx tsc",
-    "start": "node dist/index.js",
+    "start": "node out/src/index.js",
     "dev": "nodemon",
     "knex": "ts-node -r tsconfig-paths/register ./node_modules/.bin/knex",
-    "test": "jest"
+    "migrate": "npm run knex migrate:latest",
+    "seed": "npm run knex seed:run",
+    "test": "jest",
+    "postinstall": "npm run build",
+    "generate-keys": "node scripts/generate-keys.js"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "keywords": [],
   "author": "",
